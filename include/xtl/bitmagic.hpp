@@ -316,7 +316,7 @@ struct __bitmagic16: public __bitmagic_common<T, __bitmagic16<T>> {
 
 /// Generic 32 bit model
 template<typename T>
-struct __bitmagic32: public __bitmagic_common<T, __bitmagic8<T>> {
+struct __bitmagic32: public __bitmagic_common<T, __bitmagic32<T>> {
     typedef T               word_type;
 	typedef __bit_iterator<T> iterator;
     static const size_t     word_bits  = 32;
@@ -549,14 +549,19 @@ template<class _Word> struct bitmagic { };
 
 template<> struct bitmagic<char>: public __bitmagic8<char> { };
 template<> struct bitmagic<unsigned char>: public __bitmagic8<unsigned char> { };
-template<> struct bitmagic<short>: public __bitmagic8<short> { };
-template<> struct bitmagic<unsigned short>: public __bitmagic8<unsigned short> { };
-template<> struct bitmagic<int>: public __bitmagic8<int> { };
-template<> struct bitmagic<unsigned int>: public __bitmagic8<unsigned int> { };
-template<> struct bitmagic<long>: public __bitmagic8<long> { };
-template<> struct bitmagic<unsigned long>: public __bitmagic8<unsigned long> { };
-template<> struct bitmagic<long long>: public __bitmagic8<long long> { };
-template<> struct bitmagic<unsigned long long>: public __bitmagic8<unsigned long long> { };
+template<> struct bitmagic<short>: public __bitmagic16<short> { };
+template<> struct bitmagic<unsigned short>: public __bitmagic16<unsigned short> { };
+template<> struct bitmagic<int>: public __bitmagic32<int> { };
+template<> struct bitmagic<unsigned int>: public __bitmagic32<unsigned int> { };
+#ifdef _MSC_VER
+template<> struct bitmagic<long>: public __bitmagic32<long> { };
+template<> struct bitmagic<unsigned long>: public __bitmagic32<unsigned long> { };
+#else
+template<> struct bitmagic<long>: public __bitmagic64<long> { };
+template<> struct bitmagic<unsigned long>: public __bitmagic64<unsigned long> { };
+#endif
+template<> struct bitmagic<long long>: public __bitmagic64<long long> { };
+template<> struct bitmagic<unsigned long long>: public __bitmagic64<unsigned long long> { };
 #if 0
 template<> struct bitmagic<uint8_t>: public __bitmagic8<uint8_t> { };
 template<> struct bitmagic<uint32_t>: public __bitmagic32<uint32_t> { };

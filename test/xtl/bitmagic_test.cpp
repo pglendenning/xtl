@@ -32,27 +32,27 @@ namespace {
 
 REGISTER_TEST(BITMAGIC64)
 {
-    uint64_t X = 0x000f0f0f00f0f0f0ULL;
-    size_t ones = bitmagic<uint64_t>::ones(X);
-    TEST_ASSERT(ones == 24);
-    ones = bitmagic<uint64_t>::ones(0x000fffffffffffffULL);
-    TEST_ASSERT(ones == 13*4);
-    ones = bitmagic<uint64_t>::ones(0x0000000000000001ULL);
-    TEST_ASSERT(ones == 1);
-    ones = bitmagic<uint64_t>::ones(0x1000000000000001ULL);
-    TEST_ASSERT(ones == 2);
-    ones = bitmagic<uint64_t>::ones(0x1000000000000000ULL);
-    TEST_ASSERT(ones == 1);
-    ones = bitmagic<uint64_t>::ones(0x0000000100000000ULL);
-    TEST_ASSERT(ones == 1);
-    size_t lzc  = bitmagic<uint64_t>::lzc(X);
-    TEST_ASSERT(lzc == 12);
-    uint64_t lsb = bitmagic<uint64_t>::lsb(X);
-    TEST_ASSERT(lsb == 0x10);
-    uint64_t msb = bitmagic<uint64_t>::msb(X);
-    TEST_ASSERT(msb == 0x0008000000000000ULL);
-    size_t l2 = bitmagic<uint64_t>::floor_log2(X);
-    TEST_ASSERT(l2 == 51);
+	uint64_t X = 0x000f0f0f00f0f0f0ULL;
+	size_t ones = bitmagic<uint64_t>::ones(X);
+	TEST_ASSERT(ones == 24);
+	ones = bitmagic<uint64_t>::ones(0x000fffffffffffffULL);
+	TEST_ASSERT(ones == 13*4);
+	ones = bitmagic<uint64_t>::ones(0x0000000000000001ULL);
+	TEST_ASSERT(ones == 1);
+	ones = bitmagic<uint64_t>::ones(0x1000000000000001ULL);
+	TEST_ASSERT(ones == 2);
+	ones = bitmagic<uint64_t>::ones(0x1000000000000000ULL);
+	TEST_ASSERT(ones == 1);
+	ones = bitmagic<uint64_t>::ones(0x0000000100000000ULL);
+	TEST_ASSERT(ones == 1);
+	size_t lzc  = bitmagic<uint64_t>::lzc(X);
+	TEST_ASSERT(lzc == 12);
+	uint64_t lsb = bitmagic<uint64_t>::lsb(X);
+	TEST_ASSERT(lsb == 0x10);
+	uint64_t msb = bitmagic<uint64_t>::msb(X);
+	TEST_ASSERT(msb == 0x0008000000000000ULL);
+	size_t l2 = bitmagic<uint64_t>::floor_log2(X);
+	TEST_ASSERT(l2 == 51);
 }
 
 REGISTER_TEST(BITMAGIC)

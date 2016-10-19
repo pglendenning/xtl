@@ -3,7 +3,6 @@ nobase_include_HEADERS = \
 	block_vector.hpp \
 	errno.hpp \
 	intrusive_list.hpp \
-	largeuint.hpp \
 	list.hpp \
 	map.hpp \
 	property.hpp \

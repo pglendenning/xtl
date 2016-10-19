@@ -17,16 +17,21 @@ namespace Test {
 
 // ----------------------------------------------------------------------------
 
+TestException::TestException(const char* filename, int line):
+	_module(filename), _line(line)
+{
+}
+
 struct TestManager::TestCaseHolder
 {
-    TestManager::TestCase* theTest;
-    const char* name;
+	TestManager::TestCase* theTest;
+	const char* name;
 
-    void Run() {
-        if (theTest) theTest();
-    }
+	void Run() {
+		if (theTest) theTest();
+	}
 
-    TestCaseHolder(TestManager::TestCase* m=0, const char* n=0): theTest(m), name(n) {}
+	TestCaseHolder(TestManager::TestCase* m=0, const char* n=0): theTest(m), name(n) {}
 };
 
 
@@ -51,8 +56,8 @@ bool TestManager::IsRunning()
 std::vector<std::unique_ptr<TestManager::TestCaseHolder>>& TestManager::GetTests() {
 	// C++ does not guarantee construction order of class statics.
 	// This is the standard trick to solve that issue since it is guaranteed
-    // that testHolders will be constructed correctly before the first call to
-    // this function.
+	// that testHolders will be constructed correctly before the first call to
+	// this function.
 	static std::vector<std::unique_ptr<TestCaseHolder>> testHolders;
 	return testHolders;
 }
@@ -60,10 +65,11 @@ std::vector<std::unique_ptr<TestManager::TestCaseHolder>>& TestManager::GetTests
 
 const TestManager::TestCaseHolder* TestManager::AddTestCase(TestManager::TestCase* test, const char* class_name)
 {
-    // Thread safe since this function is called before main so no threads
-    if (test)
-        GetTests().push_back(std::move(std::unique_ptr<TestCaseHolder>(new TestCaseHolder(test, class_name))));   
-    return GetTests().back().get();
+	// Thread safe since this function is called before main so no threads
+	if (test) {
+		GetTests().push_back(std::move(std::unique_ptr<TestCaseHolder>(new TestCaseHolder(test, class_name))));   
+	}
+	return GetTests().back().get();
 }
 
 
@@ -86,23 +92,23 @@ int TestManager::RunInCurrentProcess()
 	std::vector<std::unique_ptr<TestCaseHolder>>& allTests = GetTests();
 
 	for (unsigned i = 0; i < allTests.size(); ++i) {
-		std::cout << "TEST #" << i << " - " << allTests[i]->name;
+		std::cout << "TEST #" << i << " - " << allTests[i]->name << std::endl;
 		try {
 			allTests[i]->Run();
-			std::cerr << "PASSED" << std::endl << std::flush;
+			std::cout << "PASSED" << std::endl << std::flush;
 		} catch(TestException& e) {
 			++failed;
-			std::cerr << "FAILED in file \"" << e._module << "\", line " << e._line <<  std::endl << std::flush;
+			std::cout << "FAILED in file \"" << e._module << "\"@line " << e._line <<  std::endl << std::flush;
 		} catch(std::exception& e) {
 			++failed;
-			std::cerr << "FAILED with std::exception- " << e.what() <<  std::endl << std::flush;
+			std::cout << "FAILED with std::exception - " << e.what() <<  std::endl << std::flush;
 		} catch(...) {
 			++failed;
-			std::cerr << "FAILED with unknown exception" <<  std::endl << std::flush;
+			std::cout << "FAILED with unknown exception" <<  std::endl << std::flush;
 		}
 	}
 	_wakeupPipe[1] = 0;
-	std::cerr << std::endl;
+	std::cout << std::endl;
 	return failed;
 }
 
@@ -122,23 +128,23 @@ bool TestManager::RunTest(const std::string& testName)
 	for (unsigned i = 0; i < allTests.size(); ++i) {
 		if (testName != allTests[i]->name)
 			continue;
-		std::cout << "TEST #" << i << " - " << allTests[i]->name;
+		std::cout << "TEST #" << i << " - " << allTests[i]->name << std::endl;
 		try {
 			allTests[i]->Run();
-			std::cerr << "PASSED" << std::endl << std::flush;
+			std::cout << "PASSED" << std::endl << std::flush;
 		} catch(TestException& e) {
 			++failed;
-			std::cerr << "FAILED in file \"" << e._module << "\", line " << e._line <<  std::endl << std::flush;
+			std::cout << "FAILED in file \"" << e._module << "\", line " << e._line <<  std::endl << std::flush;
 		} catch(std::exception& e) {
 			++failed;
-			std::cerr << "FAILED with std::exception- " << e.what() <<  std::endl << std::flush;
+			std::cout << "FAILED with std::exception- " << e.what() <<  std::endl << std::flush;
 		} catch(...) {
 			++failed;
-			std::cerr << "FAILED with unknown exception" <<  std::endl << std::flush;
+			std::cout << "FAILED with unknown exception" <<  std::endl << std::flush;
 		}
 	}
 	_wakeupPipe[1] = 0;
-	std::cerr << std::endl;
+	std::cout << std::endl;
 	return 0 == failed;
 }
 
@@ -177,7 +183,7 @@ int TestManager::RunInForkedProcess(unsigned timeoutInSecs)
 	std::vector<std::unique_ptr<TestCaseHolder>>& allTests = GetTests();
 
 	for (unsigned i = 0; i < allTests.size(); ++i) {
-		std::cout << "TEST #" << i << " - " << allTests[i]->name;
+		std::cout << "TEST #" << i << " - " << allTests[i]->name << std::endl;
 		pid_t childId = fork();
 		if (childId == 0) {
 			// Child process - close pipe and remove signal handler
@@ -187,18 +193,18 @@ int TestManager::RunInForkedProcess(unsigned timeoutInSecs)
 
 			try {
 				allTests[i]->Run();
-				std::cerr << "PASSED" << std::endl << std::flush;
+				std::cout << "PASSED" << std::endl << std::flush;
 				exit(0);
-            } catch(TestException& e) {
-                ++failed;
-                std::cerr << "FAILED in file \"" << e._module << "\", line " << e._line <<  std::endl << std::flush;
-            } catch(std::exception& e) {
-                ++failed;
-                std::cerr << "FAILED with std::exception- " << e.what() <<  std::endl << std::flush;
-            } catch(...) {
-                ++failed;
-                std::cerr << "FAILED with unknown exception" <<  std::endl << std::flush;
-            }
+			} catch(TestException& e) {
+				++failed;
+				std::cout << "FAILED in file \"" << e._module << "\", line " << e._line <<  std::endl << std::flush;
+			} catch(std::exception& e) {
+				++failed;
+				std::cout << "FAILED with std::exception- " << e.what() <<  std::endl << std::flush;
+			} catch(...) {
+				++failed;
+				std::cout << "FAILED with unknown exception" <<  std::endl << std::flush;
+			}
 			exit(1);
 
 		} else {
@@ -213,14 +219,14 @@ int TestManager::RunInForkedProcess(unsigned timeoutInSecs)
 				fd_set  rfds;
 				timeval tv = { 0 };
 
-				if (diff.count() > timeoutInSecs) {
-					std::cerr << "FAILED on timeout\n" << std::flush;
+				if (unsigned(diff.count()) >= timeoutInSecs) {
+					std::cout << "FAILED on timeout\n" << std::flush;
 					kill(childId, SIGKILL);
 					++failed;
 					break;
 				}
 
-				tv.tv_sec = timeoutInSecs - diff.count();
+				tv.tv_sec = timeoutInSecs - unsigned(diff.count());
 				tv.tv_usec = 0;
 				FD_ZERO(&rfds);
 				FD_SET(_wakeupPipe[0], &rfds);
@@ -229,11 +235,12 @@ int TestManager::RunInForkedProcess(unsigned timeoutInSecs)
 				if (err > 0) {
 					// Clear wakeup pipe
 					static char dummy[256];
-					while (read(_wakeupPipe[0], dummy, sizeof(dummy)) > 0)
+					while (read(_wakeupPipe[0], dummy, sizeof(dummy)) > 0) {
 					    /* do nothing */;
+					}
 				}
 				else if (0 == err) {
-					std::cerr << "FAILED on timeout\n" << std::flush;
+					std::cout << "FAILED on timeout\n" << std::flush;
 					kill(childId, SIGKILL);
 					++failed;
 					break;
@@ -244,7 +251,7 @@ int TestManager::RunInForkedProcess(unsigned timeoutInSecs)
 				if (err == 0) {
 					// loop
 				} else if (err < 0) {
-					std::cerr << "FAILED on waitpid\n" << std::flush;
+					std::cout << "FAILED on waitpid\n" << std::flush;
 					kill(childId, SIGKILL);
 					++failed;
 				} else if (WIFEXITED(status)) {
@@ -253,12 +260,12 @@ int TestManager::RunInForkedProcess(unsigned timeoutInSecs)
 					if (1 == WEXITSTATUS(status))
 						++failed;
 					else if (WEXITSTATUS(status))
-					    std::cerr << "EXITED with code " << WEXITSTATUS(status) << std::endl << std::flush;
+					    std::cout << "EXITED with code " << WEXITSTATUS(status) << std::endl << std::flush;
 				} else if (WIFSIGNALED(status)) {
-					std::cerr << "KILLED by signal "  << WTERMSIG(status) << std::endl << std::flush;
+					std::cout << "KILLED by signal "  << WTERMSIG(status) << std::endl << std::flush;
 					++failed;
 				} else if (WIFSTOPPED(status)) {
-					std::cerr << "STOPPED by signal "  << WSTOPSIG(status) << std::endl << std::flush;
+					std::cout << "STOPPED by signal "  << WSTOPSIG(status) << std::endl << std::flush;
 				}
 
 			} while (0 == err || (err > 0 && !WIFEXITED(status) && !WIFSIGNALED(status)));

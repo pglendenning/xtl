@@ -43,29 +43,31 @@ class TEST_API TestManager final {
 public:
 	struct TestCaseHolder;
 
-    typedef void (TestCase) (void);
+	typedef void (TestCase) (void);
 
 	TestManager();
 	~TestManager();
 
-    static size_t GetTestCount();
+	// Disabled features
+	/// @cond
+	TestManager(const TestManager&) = delete;
+	TestManager& operator = (const TestManager&) = delete;
+	/// @endcond
+
+	static size_t GetTestCount();
 	static int RunInForkedProcess(unsigned timeoutInSecs);
-    static int RunInCurrentProcess();
-    static bool RunTest(const std::string& testName);
-    static bool IsRunning();
-    static const TestCaseHolder* AddTestCase(TestCase* test, const char* class_name);
+	static int RunInCurrentProcess();
+	static bool RunTest(const std::string& testName);
+	static bool IsRunning();
+	static const TestCaseHolder* AddTestCase(TestCase* test, const char* class_name);
 
 private:
 	static int _wakeupPipe[2];
 	static void SignalWakeup(int);
 
-    /// @cond
-    static std::vector<std::unique_ptr<TestCaseHolder>>& GetTests();
-
-	// Disabled features
-	TestManager(const TestManager&);
-	TestManager& operator = (const TestManager&);
-    /// @endcond
+	/// @cond
+	static std::vector<std::unique_ptr<TestCaseHolder>>& GetTests();
+	/// @endcond
 };
 
 
@@ -74,23 +76,25 @@ private:
 class TEST_API TestException final
 {
 public:
-    TestException(const char* filename, int line);
-    std::string _module;
-    int         _line;
+	TestException(const char* filename, int line);
+	std::string _module;
+	int         _line;
 
 	// Need these so we link to the DLL version
+	/* Win version not included in this sample
 	TestException(const TestException&);
 	TestException& operator = (const TestException&);
 	~TestException();
+	*/
 };
 
 #define	NOAPI_DECL
 
 #define REGISTER_TEST_EXTERN(test_class, api_decl) \
     struct api_decl __REGISTER_##test_class final { \
-		__REGISTER_##test_class(); \
+        __REGISTER_##test_class(); \
         static void Run(void); \
-    }; \
+    } the##test_class; \
     __REGISTER_##test_class::__REGISTER_##test_class() {  \
         static const char* test_class##_name = #test_class; \
         ::Test::TestManager::AddTestCase(Run, test_class##_name); \
